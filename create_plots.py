@@ -16,47 +16,20 @@ from glob import glob
 # path definitions and constants #
 ##################################
 
-path_baseline_DQN = 'colab_DQN_infinite_horizon_JBW-v2'
-path_baseline_PPO = 'colab_PPO_infinite_horizon_JBW-v2'
-path_baseline_A2C = 'colab_A2C_infinite_horizon_JBW-v2'
-path_DQN = 'colab_DQN_infinite_horizon_JBW-continuous-1e5-v4'
-path_PPO = 'colab_PPO_infinite_horizon_JBW-continuous-1e5-v4'
-path_A2C = 'colab_A2C_infinite_horizon_JBW-continuous-1e5-v4'
-
-TAG = 'rollout/ep_rew_mean'
-
-# legend_labels = ["DQN Baseline","PPO Baseline","A2C Baseline","DQN","PPO","A2C"]
-
-# legend_labels = ["DQN Exp 1","PPO Exp 1","A2C Exp 1","DQN Exp 2","PPO Exp 2","A2C Exp 2"]
-
-# legend_labels = ["DQN","PPO","A2C"]
-
+paths = ['colab_DQN_infinite_horizon_JBW-continuous-1e5-v4', 'colab_PPO_infinite_horizon_JBW-continuous-1e5-v4', 'colab_A2C_infinite_horizon_JBW-continuous-1e5-v4', 'colab_PPO_infinite_horizon_JBW-v2']
 legend_labels = ["DQN","PPO","A2C","PPO Baseline"]
+tags = ['rollout/ep_rew_mean'] * len(paths)
 
 ##############
 # load files #
 ##############
 
-files_baseline_DQN = [y for x in os.walk(path_baseline_DQN) for y in glob(os.path.join(x[0], '*'))]
-files_baseline_PPO = [y for x in os.walk(path_baseline_PPO) for y in glob(os.path.join(x[0], '*'))]
-files_baseline_A2C = [y for x in os.walk(path_baseline_A2C) for y in glob(os.path.join(x[0], '*'))]
-files_DQN = [y for x in os.walk(path_DQN) for y in glob(os.path.join(x[0], '*'))]
-files_PPO = [y for x in os.walk(path_PPO) for y in glob(os.path.join(x[0], '*'))]
-files_A2C = [y for x in os.walk(path_A2C) for y in glob(os.path.join(x[0], '*'))]
-
-# filter files for tb logs
-
-files_baseline_DQN = [x for x in files_baseline_DQN if 'tfevents' in x]
-files_baseline_PPO = [x for x in files_baseline_PPO if 'tfevents' in x]
-files_baseline_A2C = [x for x in files_baseline_A2C if 'tfevents' in x]
-files_DQN = [x for x in files_DQN if 'tfevents' in x]
-files_PPO = [x for x in files_PPO if 'tfevents' in x]
-files_A2C = [x for x in files_A2C if 'tfevents' in x]
-
-# experiments = [files_baseline_DQN, files_baseline_PPO, files_baseline_A2C, files_DQN, files_PPO, files_A2C]
-
-# experiments = [files_DQN, files_PPO, files_A2C]
-experiments = [files_DQN, files_PPO, files_A2C, files_baseline_PPO]
+for i in range(len(paths)):
+    paths[i] = [y for x in os.walk(paths[i]) for y in glob(os.path.join(x[0], '*'))]
+    # filter files for tb logs
+    paths[i] = [x for x in paths[i] if 'tfevents' in x]
+    
+experiments = paths
 
 ###########################
 # load tb logs from files #
@@ -65,7 +38,7 @@ experiments = [files_DQN, files_PPO, files_A2C, files_baseline_PPO]
 ys = []
 
 i = 0
-for paths in experiments:
+for paths, tag in zip(experiments, tags):
     print('experiment',i)
     ys.append([])
     j = 0
@@ -74,13 +47,11 @@ for paths in experiments:
         print('seed',j)
         for e in tf.compat.v1.train.summary_iterator(path):
             for v in e.summary.value:
-                if v.tag == TAG:
+                if v.tag == tag:
         #             print(v.simple_value)
                     ys[i][j] = ys[i][j] + [v.simple_value]
         j = j+1
     i = i+1
-
-# print(ys[0][0])
 
 #####################################################
 # filter cancelled experimetns with incomplete data #
@@ -141,12 +112,10 @@ for exp in ys:
         if len(y) == max_len:
             continue
         x = list(range(len(y)))
-#         print(len(x))
         f = interp1d(x, y)
         f2 = interp1d(x, y, kind='cubic')
 
         xnew = np.linspace(0, len(y)-1, num=max_len, endpoint=True)
-#         print(len(f(xnew)))
 
         ys[i][j] = f(xnew)
         j = j + 1
