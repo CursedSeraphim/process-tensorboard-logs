@@ -13,7 +13,16 @@ import os
 from glob import glob
 
 
-def create_plot(paths, legend_labels, tags, save_dir, base_path=""):
+def create_plots(paths, legend_labels, tags, save_dirs, base_paths, colours=None):
+    if colours:
+        for (paths, legend_labels, tags, save_dir, base_path, colours) in zip(paths, legend_labels, tags, save_dirs, base_paths, colours):
+            create_plot(paths, legend_labels, tags, save_dir, base_path, colours)
+    else:
+        for (paths, legend_labels, tags, save_dir, base_path) in zip(paths, legend_labels, tags, save_dirs, base_paths):
+            create_plot(paths, legend_labels, tags, save_dir, base_path)
+
+
+def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None):
 
     ##################################
     # path definitions and constants #
@@ -154,10 +163,16 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path=""):
         
     x = list(range(max_len))
     i=1
-    for q25, q50, q75, in zip(q25s, q50s, q75s):
-        plt.plot(x, q50)
-        plt.fill_between(x, q25, q75, alpha=0.3);
-        i = i + 1
+    if colours:
+        for q25, q50, q75, c in zip(q25s, q50s, q75s, colours):
+            plt.plot(x, q50, color=c)
+            plt.fill_between(x, q25, q75, alpha=0.3, color=c)
+            i = i + 1
+    else:
+        for q25, q50, q75 in zip(q25s, q50s, q75s):
+            plt.plot(x, q50)
+            plt.fill_between(x, q25, q75, alpha=0.3)
+            i = i + 1
         
     plt.legend(legend_labels, loc='upper left')
     ticks = x[0::len(x)//5]
