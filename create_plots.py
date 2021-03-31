@@ -12,156 +12,161 @@ tf.disable_v2_behavior()
 import os
 from glob import glob
 
-##################################
-# path definitions and constants #
-##################################
 
-paths = ['colab_DQN_infinite_horizon_JBW-continuous-1e5-v4', 'colab_PPO_infinite_horizon_JBW-continuous-1e5-v4', 'colab_A2C_infinite_horizon_JBW-continuous-1e5-v4', 'colab_PPO_infinite_horizon_JBW-v2']
-legend_labels = ["DQN","PPO","A2C","PPO Baseline"]
-tags = ['rollout/ep_rew_mean'] * len(paths)
+def create_plot(paths, legend_labels, tags, save_dir, base_path=""):
 
-##############
-# load files #
-##############
+    ##################################
+    # path definitions and constants #
+    ##################################
 
-for i in range(len(paths)):
-    paths[i] = [y for x in os.walk(paths[i]) for y in glob(os.path.join(x[0], '*'))]
-    # filter files for tb logs
-    paths[i] = [x for x in paths[i] if 'tfevents' in x]
-    
-experiments = paths
+    # paths = ['colab_DQN_infinite_horizon_JBW-continuous-1e5-v4', 'colab_PPO_infinite_horizon_JBW-continuous-1e5-v4', 'colab_A2C_infinite_horizon_JBW-continuous-1e5-v4', 'colab_PPO_infinite_horizon_JBW-v2']
+    # base_path = 'logs'
+    paths = [base_path+'/'+p for p in paths]
+    # legend_labels = ["DQN","PPO","A2C","PPO Baseline"]
+    # tags = ['rollout/ep_rew_mean'] * len(paths)
 
-###########################
-# load tb logs from files #
-###########################
+    ##############
+    # load files #
+    ##############
 
-ys = []
-
-i = 0
-for paths, tag in zip(experiments, tags):
-    print('experiment',i)
-    ys.append([])
-    j = 0
-    for path in paths:
-        ys[i].append([])
-        print('seed',j)
-        for e in tf.compat.v1.train.summary_iterator(path):
-            for v in e.summary.value:
-                if v.tag == tag:
-        #             print(v.simple_value)
-                    ys[i][j] = ys[i][j] + [v.simple_value]
-        j = j+1
-    i = i+1
-
-#####################################################
-# filter cancelled experimetns with incomplete data #
-#####################################################
-# i.e. seeds that ran for fewer steps than the max length
-
-print('before filtering:')
-for exp in ys:
-    print([len(i) for i in exp])
-print()
-
-for exp in ys:
-    m = max([len(i) for i in exp])
-    print(m)
-    i = 0
-    for seed in exp:
-        if len(seed) < m:
-            exp.pop(i)
-            i -= 1
-        i += 1
+    for i in range(len(paths)):
+        paths[i] = [y for x in os.walk(paths[i]) for y in glob(os.path.join(x[0], '*'))]
+        # filter files for tb logs
+        paths[i] = [x for x in paths[i] if 'tfevents' in x]
         
-print('after filtering:')
-for exp in ys:
-    print([len(i) for i in exp])
+    experiments = paths
 
-###################################################
-# exponential moving average smoothing definition #
-###################################################
+    ###########################
+    # load tb logs from files #
+    ###########################
 
-def smooth(scalars: List[float], weight: float) -> List[float]:  # Weight between 0 and 1
-    last = scalars[0]  # First value in the plot (first timestep)
-    smoothed = list()
-    for point in scalars:
-        smoothed_val = last * weight + (1 - weight) * point  # Calculate smoothed value
-        smoothed.append(smoothed_val)                        # Save it
-        last = smoothed_val                                  # Anchor the last smoothed value
+    ys = []
 
-    return smoothed
+    i = 0
+    for paths, tag in zip(experiments, tags):
+        print('experiment',i)
+        ys.append([])
+        j = 0
+        for path in paths:
+            ys[i].append([])
+            print('seed',j)
+            for e in tf.compat.v1.train.summary_iterator(path):
+                for v in e.summary.value:
+                    if v.tag == tag:
+            #             print(v.simple_value)
+                        ys[i][j] = ys[i][j] + [v.simple_value]
+            j = j+1
+        i = i+1
 
-#######################################
-# find log with max num of datapoints #
-#######################################
-# different algorithm experiments might have logs at different amounts of steps, need to unify the x axis for plotting later on best before calculating iqr and applying smoothing
+    #####################################################
+    # filter cancelled experimetns with incomplete data #
+    #####################################################
+    # i.e. seeds that ran for fewer steps than the max length
 
-# ys = [experiments, seeds, values] - use this to find largest nested sub array:
-x = [[len(j) for j in i] for i in ys]
-max_len = max(max(x))
-print(max_len)
+    print('before filtering:')
+    for exp in ys:
+        print([len(i) for i in exp])
+    print()
 
-#################################
-# interpolate / upsample others #
-#################################
+    for exp in ys:
+        m = max([len(i) for i in exp])
+        print(m)
+        i = 0
+        for seed in exp:
+            if len(seed) < m:
+                exp.pop(i)
+                i -= 1
+            i += 1
+            
+    print('after filtering:')
+    for exp in ys:
+        print([len(i) for i in exp])
 
-i = 0
-for exp in ys:
-    j = 0
-    for y in exp:
-        if len(y) == max_len:
-            continue
-        x = list(range(len(y)))
-        f = interp1d(x, y)
-        f2 = interp1d(x, y, kind='cubic')
+    ###################################################
+    # exponential moving average smoothing definition #
+    ###################################################
 
-        xnew = np.linspace(0, len(y)-1, num=max_len, endpoint=True)
+    def smooth(scalars: List[float], weight: float) -> List[float]:  # Weight between 0 and 1
+        last = scalars[0]  # First value in the plot (first timestep)
+        smoothed = list()
+        for point in scalars:
+            smoothed_val = last * weight + (1 - weight) * point  # Calculate smoothed value
+            smoothed.append(smoothed_val)                        # Save it
+            last = smoothed_val                                  # Anchor the last smoothed value
 
-        ys[i][j] = f(xnew)
-        j = j + 1
-    i = i + 1
+        return smoothed
 
-#################################
-# calc IQR, and apply smoothing #
-#################################
+    #######################################
+    # find log with max num of datapoints #
+    #######################################
+    # different algorithm experiments might have logs at different amounts of steps, need to unify the x axis for plotting later on best before calculating iqr and applying smoothing
 
-q75s = []
-q50s = []
-q25s = []
-i = 0
-for exp in ys:
-    q75s.append([])
-    q50s.append([])
-    q25s.append([])
-    q75s[i], q50s[i], q25s[i] = np.percentile(exp, [75, 50, 25], axis=0)
-    
-    q75s[i] = smooth(q75s[i], 0.95)
-    q50s[i] = smooth(q50s[i], 0.95)
-    q25s[i] = smooth(q25s[i], 0.95)
-    
-    i = i + 1
+    # ys = [experiments, seeds, values] - use this to find largest nested sub array:
+    x = [[len(j) for j in i] for i in ys]
+    max_len = max(max(x))
+    print(max_len)
 
-###############
-# create plot #
-###############
+    #################################
+    # interpolate / upsample others #
+    #################################
 
-plt.figure(figsize=(18,12))
-    
-x = list(range(max_len))
-i=1
-for q25, q50, q75, in zip(q25s, q50s, q75s):
-    plt.plot(x, q50)
-    plt.fill_between(x, q25, q75, alpha=0.3);
-    i = i + 1
-    
-plt.legend(legend_labels, loc='upper left')
-ticks = x[0::len(x)//5]
-ticks.append(len(x))
-labels = [(2000000//len(x)) * i for i in ticks]
-plt.xticks(ticks=ticks, labels=labels)
-plt.ylabel('Reward')
-plt.xlabel('Steps')
-print(labels)
-plt.grid()
-plt.show()
+    i = 0
+    for exp in ys:
+        j = 0
+        for y in exp:
+            if len(y) == max_len:
+                continue
+            x = list(range(len(y)))
+            f = interp1d(x, y)
+            f2 = interp1d(x, y, kind='cubic')
+
+            xnew = np.linspace(0, len(y)-1, num=max_len, endpoint=True)
+
+            ys[i][j] = f(xnew)
+            j = j + 1
+        i = i + 1
+
+    #################################
+    # calc IQR, and apply smoothing #
+    #################################
+
+    q75s = []
+    q50s = []
+    q25s = []
+    i = 0
+    for exp in ys:
+        q75s.append([])
+        q50s.append([])
+        q25s.append([])
+        q75s[i], q50s[i], q25s[i] = np.percentile(exp, [75, 50, 25], axis=0)
+        
+        q75s[i] = smooth(q75s[i], 0.95)
+        q50s[i] = smooth(q50s[i], 0.95)
+        q25s[i] = smooth(q25s[i], 0.95)
+        
+        i = i + 1
+
+    ###############
+    # create plot #
+    ###############
+
+    plt.figure(figsize=(18,12))
+        
+    x = list(range(max_len))
+    i=1
+    for q25, q50, q75, in zip(q25s, q50s, q75s):
+        plt.plot(x, q50)
+        plt.fill_between(x, q25, q75, alpha=0.3);
+        i = i + 1
+        
+    plt.legend(legend_labels, loc='upper left')
+    ticks = x[0::len(x)//5]
+    ticks.append(len(x))
+    labels = [(2000000//len(x)) * i for i in ticks]
+    plt.xticks(ticks=ticks, labels=labels)
+    plt.ylabel('Reward')
+    plt.xlabel('Steps')
+    print(labels)
+    plt.grid()
+    plt.savefig(save_dir)
 
