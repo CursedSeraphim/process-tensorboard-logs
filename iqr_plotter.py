@@ -28,11 +28,9 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
     # path definitions and constants #
     ##################################
 
-    # paths = ['colab_DQN_infinite_horizon_JBW-continuous-1e5-v4', 'colab_PPO_infinite_horizon_JBW-continuous-1e5-v4', 'colab_A2C_infinite_horizon_JBW-continuous-1e5-v4', 'colab_PPO_infinite_horizon_JBW-v2']
-    # base_path = 'logs'
     paths = [base_path+'/'+p for p in paths]
-    # legend_labels = ["DQN","PPO","A2C","PPO Baseline"]
-    # tags = ['rollout/ep_rew_mean'] * len(paths)
+    # make sure both directory strings like '//' as well as '/' are possible by replacing double by single
+    paths = [s.replace('//','/') for s in paths]
 
     ##############
     # load files #
@@ -42,8 +40,12 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
         paths[i] = [y for x in os.walk(paths[i]) for y in glob(os.path.join(x[0], '*'))]
         # filter files for tb logs
         paths[i] = [x for x in paths[i] if 'tfevents' in x]
-        
+
     experiments = paths
+
+    for i in experiments:
+        for j in i:
+            print(j)
 
     ###########################
     # load tb logs from files #
@@ -62,7 +64,6 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
             for e in tf.compat.v1.train.summary_iterator(path):
                 for v in e.summary.value:
                     if v.tag == tag:
-            #             print(v.simple_value)
                         ys[i][j] = ys[i][j] + [v.simple_value]
             j = j+1
         i = i+1
@@ -72,14 +73,14 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
     #####################################################
     # i.e. seeds that ran for fewer steps than the max length
 
-    print('before filtering:')
-    for exp in ys:
-        print([len(i) for i in exp])
-    print()
+    # print('before filtering:')
+    # for exp in ys:
+    #     print([len(i) for i in exp])
+    # print()
 
     for exp in ys:
         m = max([len(i) for i in exp])
-        print(m)
+        # print(m)
         i = 0
         for seed in exp:
             if len(seed) < m:
@@ -87,9 +88,9 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
                 i -= 1
             i += 1
             
-    print('after filtering:')
-    for exp in ys:
-        print([len(i) for i in exp])
+    # print('after filtering:')
+    # for exp in ys:
+    #     print([len(i) for i in exp])
 
     ###################################################
     # exponential moving average smoothing definition #
@@ -113,7 +114,7 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
     # ys = [experiments, seeds, values] - use this to find largest nested sub array:
     x = [[len(j) for j in i] for i in ys]
     max_len = max(max(x))
-    print(max_len)
+    # print(max_len)
 
     #################################
     # interpolate / upsample others #
