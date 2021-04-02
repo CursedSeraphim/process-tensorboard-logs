@@ -69,7 +69,7 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
         i = i+1
 
     #####################################################
-    # filter cancelled experimetns with incomplete data #
+    # filter cancelled experiments with incomplete data #
     #####################################################
     # i.e. seeds that ran for fewer steps than the max length
 
@@ -132,9 +132,24 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
 
             xnew = np.linspace(0, len(y)-1, num=max_len, endpoint=True)
 
-            ys[i][j] = f(xnew)
+            temp = f(xnew)
+            if isinstance(temp, list):
+                ys[i][j] = temp
+            else:
+                ys[i][j] = temp.tolist()
             j = j + 1
         i = i + 1
+
+    # filter length again
+    for exp in ys:
+        m = max([len(i) for i in exp])
+        # print(m)
+        i = 0
+        for seed in exp:
+            if len(seed) < m:
+                exp.pop(i)
+                i -= 1
+            i += 1
 
     #################################
     # calc IQR, and apply smoothing #
@@ -148,8 +163,11 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
         q75s.append([])
         q50s.append([])
         q25s.append([])
+        # print(i)
+        # print('exp len', len(exp))
+        print('trying to percentile from exp:')
+        [print(len(e), type(e)) for e in exp]
         q75s[i], q50s[i], q25s[i] = np.percentile(exp, [75, 50, 25], axis=0)
-        
         q75s[i] = smooth(q75s[i], 0.95)
         q50s[i] = smooth(q50s[i], 0.95)
         q25s[i] = smooth(q25s[i], 0.95)
