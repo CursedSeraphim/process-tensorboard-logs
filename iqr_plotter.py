@@ -163,10 +163,6 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
         q75s.append([])
         q50s.append([])
         q25s.append([])
-        # print(i)
-        # print('exp len', len(exp))
-        print('trying to percentile from exp:')
-        [print(len(e), type(e)) for e in exp]
         q75s[i], q50s[i], q25s[i] = np.percentile(exp, [75, 50, 25], axis=0)
         q75s[i] = smooth(q75s[i], 0.95)
         q50s[i] = smooth(q50s[i], 0.95)
