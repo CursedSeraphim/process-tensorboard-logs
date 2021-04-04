@@ -1,6 +1,5 @@
 # process-tensorboard-logs
 
-The notebooks apply python code to
 * read all files from a folder
 * filter them down to tensorboard log event files
 * read these files and turn them into pandas data frames
