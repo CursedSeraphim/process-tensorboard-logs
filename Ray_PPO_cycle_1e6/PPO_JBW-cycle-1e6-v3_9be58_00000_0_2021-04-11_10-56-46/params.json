@@ -1,0 +1,48 @@
+{
+  "env": "JBW-cycle-1e6-v3",
+  "env_config": {
+    "render": false,
+    "reproducible_seed": 2,
+    "reward_fn": "<bound method cyclic_reward_schedule.reward of <custom_environments.cyclic_reward_schedule object at 0x7fc5c33a80d0>>",
+    "sim_config": "<jbw.simulator.SimulatorConfig object at 0x7fc5c33a8090>"
+  },
+  "framework": "torch",
+  "horizon": 10000.0,
+  "metrics_smoothing_episodes": 1,
+  "min_iter_time_s": 0,
+  "model": {
+    "conv_activation": "relu",
+    "conv_filters": [
+      [
+        16,
+        [
+          3,
+          3
+        ],
+        2
+      ],
+      [
+        32,
+        [
+          3,
+          3
+        ],
+        2
+      ],
+      [
+        512,
+        [
+          3,
+          3
+        ],
+        1
+      ]
+    ],
+    "custom_model": "my_model",
+    "dim": 11
+  },
+  "num_gpus": 1,
+  "num_workers": 1,
+  "seed": 2,
+  "soft_horizon": true
+}

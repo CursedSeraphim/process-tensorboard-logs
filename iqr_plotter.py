@@ -13,16 +13,24 @@ import os
 from glob import glob
 
 
-def create_plots(paths, legend_labels, tags, save_dirs, base_paths, colours=None):
-    if colours:
-        for (paths, legend_labels, tags, save_dir, base_path, colours) in zip(paths, legend_labels, tags, save_dirs, base_paths, colours):
-            create_plot(paths, legend_labels, tags, save_dir, base_path, colours)
+def create_plots(paths, legend_labels, tags, save_dirs, base_paths, colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, titles=None):
+    if titles:
+        if colours:
+            for (paths, legend_labels, tags, save_dir, base_path, colours, title) in zip(paths, legend_labels, tags, save_dirs, base_paths, colours, titles):
+                create_plot(paths, legend_labels, tags, save_dir, base_path, colours, xmax, n_samples, figsize=figsize, smoothing=smoothing, title=title)
+        else:
+            for (paths, legend_labels, tags, save_dir, base_path, title) in zip(paths, legend_labels, tags, save_dirs, base_paths, titles):
+                create_plot(paths, legend_labels, tags, save_dir, base_path, xmax=xmax, n_samples=n_samples, figsize=figsize, smoothing=smoothing, title=title)
     else:
-        for (paths, legend_labels, tags, save_dir, base_path) in zip(paths, legend_labels, tags, save_dirs, base_paths):
-            create_plot(paths, legend_labels, tags, save_dir, base_path)
+        if colours:
+            for (paths, legend_labels, tags, save_dir, base_path, colours) in zip(paths, legend_labels, tags, save_dirs, base_paths, colours):
+                create_plot(paths, legend_labels, tags, save_dir, base_path, colours, xmax, n_samples, figsize=figsize, smoothing=smoothing)
+        else:
+            for (paths, legend_labels, tags, save_dir, base_path) in zip(paths, legend_labels, tags, save_dirs, base_paths):
+                create_plot(paths, legend_labels, tags, save_dir, base_path, xmax=xmax, n_samples=n_samples, figsize=figsize, smoothing=smoothing)
 
 
-def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None):
+def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, title=None):
 
     ##################################
     # path definitions and constants #
@@ -164,9 +172,9 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
         q50s.append([])
         q25s.append([])
         q75s[i], q50s[i], q25s[i] = np.percentile(exp, [75, 50, 25], axis=0)
-        q75s[i] = smooth(q75s[i], 0.95)
-        q50s[i] = smooth(q50s[i], 0.95)
-        q25s[i] = smooth(q25s[i], 0.95)
+        q75s[i] = smooth(q75s[i], smoothing)
+        q50s[i] = smooth(q50s[i], smoothing)
+        q25s[i] = smooth(q25s[i], smoothing)
         
         i = i + 1
 
@@ -174,9 +182,9 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
     # create plot #
     ###############
 
-    plt.figure(figsize=(18,12))
-        
-    x = list(range(max_len))
+    plt.figure(figsize=figsize)
+    # x = list(range(max_len))
+    x = np.linspace(1, xmax, max_len)
     i=1
     if colours:
         for q25, q50, q75, c in zip(q25s, q50s, q75s, colours):
@@ -190,13 +198,19 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
             i = i + 1
         
     plt.legend(legend_labels, loc='upper left')
-    ticks = x[0::len(x)//5]
-    ticks.append(len(x))
-    labels = [(2000000//len(x)) * i for i in ticks]
-    plt.xticks(ticks=ticks, labels=labels)
+    # ticks = x[0::len(x)//5]
+    # ticks.append(n_samples)
+    # print('n_samples:', n_samples)
+    # print('TICKS:', ticks)
+    # print(xmax//n_samples)
+    # labels = [(xmax//n_samples) * i for i in ticks]
+    # plt.xticks(ticks=ticks, labels=labels)
     plt.ylabel('Reward')
     plt.xlabel('Steps')
-    print(labels)
+    if title:
+        plt.title(title)
+    # plt.xticks(np.arange(min(x), max(x)+1, xmax))
+    # print(labels)
     plt.grid()
     plt.savefig(save_dir)
 
