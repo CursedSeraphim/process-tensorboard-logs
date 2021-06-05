@@ -23,6 +23,8 @@ parser.add_argument('--smoothing', default=0.6, type=float,
                     help='tb like smoothing weight')
 parser.add_argument('--titles', default=None, type=str, nargs='+',
                     help='plot titles like --titles plot1 plot2')
+parser.add_argument('--tag', default='rollout/ep_rew_mean', type=str,
+                    help='tf event tag like --tag rollout/ep_rew_mean')
 
 args = parser.parse_args()
 
@@ -49,11 +51,11 @@ for i in range(len(base)):
 
 legend_labels = paths
 save_dirs = [save_dir+b for b in base]
-tags = [ ['rollout/ep_rew_mean' for p in b] for b in paths]
+
 base_paths = [logs_dir for b in base]
 
 ################
 # create plots #
 ################
 
-create_plots(paths=paths, legend_labels=legend_labels, tags=tags, save_dirs=save_dirs, base_paths=base_paths, colours=args.c, xmax=args.xmax, figsize=args.figsize, n_samples=args.n_samples, smoothing=args.smoothing, titles=args.titles)
+create_plots(paths=paths, legend_labels=legend_labels, tag=args.tag, save_dirs=save_dirs, base_paths=base_paths, colours=args.c, xmax=args.xmax, figsize=args.figsize, n_samples=args.n_samples, smoothing=args.smoothing, titles=args.titles)

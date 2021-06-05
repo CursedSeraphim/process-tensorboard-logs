@@ -13,24 +13,24 @@ import os
 from glob import glob
 
 
-def create_plots(paths, legend_labels, tags, save_dirs, base_paths, colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, titles=None):
+def create_plots(paths, legend_labels, tag, save_dirs, base_paths, colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, titles=None):
     if titles:
         if colours:
-            for (paths, legend_labels, tags, save_dir, base_path, colours, title) in zip(paths, legend_labels, tags, save_dirs, base_paths, colours, titles):
-                create_plot(paths, legend_labels, tags, save_dir, base_path, colours, xmax, n_samples, figsize=figsize, smoothing=smoothing, title=title)
+            for (paths, legend_labels, save_dir, base_path, colours, title) in zip(paths, legend_labels,save_dirs, base_paths, colours, titles):
+                create_plot(paths, legend_labels, tag, save_dir, base_path, colours, xmax, n_samples, figsize=figsize, smoothing=smoothing, title=title)
         else:
-            for (paths, legend_labels, tags, save_dir, base_path, title) in zip(paths, legend_labels, tags, save_dirs, base_paths, titles):
-                create_plot(paths, legend_labels, tags, save_dir, base_path, xmax=xmax, n_samples=n_samples, figsize=figsize, smoothing=smoothing, title=title)
+            for (paths, legend_labels, save_dir, base_path, title) in zip(paths, legend_labels, save_dirs, base_paths, titles):
+                create_plot(paths, legend_labels, tag, save_dir, base_path, xmax=xmax, n_samples=n_samples, figsize=figsize, smoothing=smoothing, title=title)
     else:
         if colours:
-            for (paths, legend_labels, tags, save_dir, base_path, colours) in zip(paths, legend_labels, tags, save_dirs, base_paths, colours):
-                create_plot(paths, legend_labels, tags, save_dir, base_path, colours, xmax, n_samples, figsize=figsize, smoothing=smoothing)
+            for (paths, legend_labels, save_dir, base_path, colours) in zip(paths, legend_labels, save_dirs, base_paths, colours):
+                create_plot(paths, legend_labels, tag, save_dir, base_path, colours, xmax, n_samples, figsize=figsize, smoothing=smoothing)
         else:
-            for (paths, legend_labels, tags, save_dir, base_path) in zip(paths, legend_labels, tags, save_dirs, base_paths):
-                create_plot(paths, legend_labels, tags, save_dir, base_path, xmax=xmax, n_samples=n_samples, figsize=figsize, smoothing=smoothing)
+            for (paths, legend_labels, save_dir, base_path) in zip(paths, legend_labels, save_dirs, base_paths):
+                create_plot(paths, legend_labels, tag, save_dir, base_path, xmax=xmax, n_samples=n_samples, figsize=figsize, smoothing=smoothing)
 
 
-def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, title=None):
+def create_plot(paths, legend_labels, tag, save_dir, base_path="", colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, title=None):
 
     ##################################
     # path definitions and constants #
@@ -62,7 +62,7 @@ def create_plot(paths, legend_labels, tags, save_dir, base_path="", colours=None
     ys = []
 
     i = 0
-    for paths, tag in zip(experiments, tags):
+    for paths in experiments:
         print('experiment',i)
         ys.append([])
         j = 0
