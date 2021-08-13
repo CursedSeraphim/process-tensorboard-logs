@@ -14,7 +14,7 @@ import pathlib
 from glob import glob
 
 
-def create_plots(paths, legend_labels, tag, save_dirs, base_paths, colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, titles=None, legend_loc='upper left'):
+def create_plots(paths, legend_labels, tag, save_dirs, base_paths, colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, titles=None, legend_loc='upper left', ylabel='Reward'):
     if not titles:
         titles = []
         for p in paths:
@@ -24,13 +24,13 @@ def create_plots(paths, legend_labels, tag, save_dirs, base_paths, colours=None,
             
     if colours:
         for (paths, legend_labels, save_dir, base_path, colours, title) in zip(paths, legend_labels,save_dirs, base_paths, colours, titles):
-            create_plot(paths, legend_labels, tag, save_dir, base_path, colours, xmax, n_samples, figsize=figsize, smoothing=smoothing, title=title, legend_loc=legend_loc)
+            create_plot(paths, legend_labels, tag, save_dir, base_path, colours, xmax, n_samples, figsize=figsize, smoothing=smoothing, title=title, legend_loc=legend_loc, ylabel=ylabel)
     else:
         for (paths, legend_labels, save_dir, base_path, title) in zip(paths, legend_labels, save_dirs, base_paths, titles):
-            create_plot(paths, legend_labels, tag, save_dir, base_path, xmax=xmax, n_samples=n_samples, figsize=figsize, smoothing=smoothing, title=title, legend_loc=legend_loc)
+            create_plot(paths, legend_labels, tag, save_dir, base_path, xmax=xmax, n_samples=n_samples, figsize=figsize, smoothing=smoothing, title=title, legend_loc=legend_loc, ylabel=ylabel)
     
 
-def create_plot(paths, legend_labels, tag, save_dir, base_path="", colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, title=None, legend_loc='upper left'):
+def create_plot(paths, legend_labels, tag, save_dir, base_path="", colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, title=None, legend_loc='upper left', ylabel='Reward'):
 
     ##################################
     # path definitions and constants #
@@ -205,7 +205,7 @@ def create_plot(paths, legend_labels, tag, save_dir, base_path="", colours=None,
     # print(xmax//n_samples)
     # labels = [(xmax//n_samples) * i for i in ticks]
     # plt.xticks(ticks=ticks, labels=labels)
-    plt.ylabel('Reward')
+    plt.ylabel(ylabel)
     plt.xlabel('Steps')
     if title:
         plt.title(title)

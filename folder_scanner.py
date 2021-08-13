@@ -27,6 +27,8 @@ parser.add_argument('--tag', default='rollout/ep_rew_mean', type=str,
                     help='tf event tag like --tag rollout/ep_rew_mean')
 parser.add_argument('--legendloc', default='upper left', type=str,
                     help='tf event tag like --legendloc "upper right"')
+parser.add_argument('--ylabel', default='Reward', type=str,
+                    help='tf event tag like --ylabel Reward')                    
 
 args = parser.parse_args()
 
@@ -60,4 +62,4 @@ base_paths = [logs_dir for b in base]
 # create plots #
 ################
 
-create_plots(paths=paths, legend_labels=legend_labels, tag=args.tag, save_dirs=save_dirs, base_paths=base_paths, colours=args.c, xmax=args.xmax, figsize=args.figsize, n_samples=args.n_samples, smoothing=args.smoothing, titles=args.titles, legend_loc=args.legendloc)
+create_plots(paths=paths, legend_labels=legend_labels, tag=args.tag, save_dirs=save_dirs, base_paths=base_paths, colours=args.c, xmax=args.xmax, figsize=args.figsize, n_samples=args.n_samples, smoothing=args.smoothing, titles=args.titles, legend_loc=args.legendloc, ylabel=args.ylabel)
