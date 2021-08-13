@@ -17,7 +17,7 @@ parser.add_argument('--xmax', default=int(2e6), type=int,
                     help='extent of x axis')
 parser.add_argument('--n_samples', default=1000, type=int,
                     help='amount of samples. for each sample in a plot it will move xmax/n_samples along the x-axis')
-parser.add_argument('--figsize', default=(6,4), nargs='+',
+parser.add_argument('--figsize', default=(12,8), nargs='+',
                     help='maptlotlib figsize as in (18, 12), use --figsize 18 12')
 parser.add_argument('--smoothing', default=0.6, type=float,
                     help='tb like smoothing weight')
@@ -25,6 +25,8 @@ parser.add_argument('--titles', default=None, type=str, nargs='+',
                     help='plot titles like --titles plot1 plot2')
 parser.add_argument('--tag', default='rollout/ep_rew_mean', type=str,
                     help='tf event tag like --tag rollout/ep_rew_mean')
+parser.add_argument('--legendloc', default='upper left', type=str,
+                    help='tf event tag like --legendloc "upper right"')
 
 args = parser.parse_args()
 
@@ -58,4 +60,4 @@ base_paths = [logs_dir for b in base]
 # create plots #
 ################
 
-create_plots(paths=paths, legend_labels=legend_labels, tag=args.tag, save_dirs=save_dirs, base_paths=base_paths, colours=args.c, xmax=args.xmax, figsize=args.figsize, n_samples=args.n_samples, smoothing=args.smoothing, titles=args.titles)
+create_plots(paths=paths, legend_labels=legend_labels, tag=args.tag, save_dirs=save_dirs, base_paths=base_paths, colours=args.c, xmax=args.xmax, figsize=args.figsize, n_samples=args.n_samples, smoothing=args.smoothing, titles=args.titles, legend_loc=args.legendloc)

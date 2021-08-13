@@ -14,7 +14,7 @@ import pathlib
 from glob import glob
 
 
-def create_plots(paths, legend_labels, tag, save_dirs, base_paths, colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, titles=None):
+def create_plots(paths, legend_labels, tag, save_dirs, base_paths, colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, titles=None, legend_loc='upper left'):
     if not titles:
         titles = []
         for p in paths:
@@ -24,13 +24,13 @@ def create_plots(paths, legend_labels, tag, save_dirs, base_paths, colours=None,
             
     if colours:
         for (paths, legend_labels, save_dir, base_path, colours, title) in zip(paths, legend_labels,save_dirs, base_paths, colours, titles):
-            create_plot(paths, legend_labels, tag, save_dir, base_path, colours, xmax, n_samples, figsize=figsize, smoothing=smoothing, title=title)
+            create_plot(paths, legend_labels, tag, save_dir, base_path, colours, xmax, n_samples, figsize=figsize, smoothing=smoothing, title=title, legend_loc=legend_loc)
     else:
         for (paths, legend_labels, save_dir, base_path, title) in zip(paths, legend_labels, save_dirs, base_paths, titles):
-            create_plot(paths, legend_labels, tag, save_dir, base_path, xmax=xmax, n_samples=n_samples, figsize=figsize, smoothing=smoothing, title=title)
+            create_plot(paths, legend_labels, tag, save_dir, base_path, xmax=xmax, n_samples=n_samples, figsize=figsize, smoothing=smoothing, title=title, legend_loc=legend_loc)
     
 
-def create_plot(paths, legend_labels, tag, save_dir, base_path="", colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, title=None):
+def create_plot(paths, legend_labels, tag, save_dir, base_path="", colours=None, xmax=int(2e6), n_samples=1000, figsize=(6,4), smoothing=0.6, title=None, legend_loc='upper left'):
 
     ##################################
     # path definitions and constants #
@@ -197,7 +197,7 @@ def create_plot(paths, legend_labels, tag, save_dir, base_path="", colours=None,
             plt.fill_between(x, q25, q75, alpha=0.3)
             i = i + 1
         
-    plt.legend(legend_labels, loc='upper left')
+    plt.legend(legend_labels, loc=legend_loc)
     # ticks = x[0::len(x)//5]
     # ticks.append(n_samples)
     # print('n_samples:', n_samples)
@@ -212,5 +212,5 @@ def create_plot(paths, legend_labels, tag, save_dir, base_path="", colours=None,
     # plt.xticks(np.arange(min(x), max(x)+1, xmax))
     # print(labels)
     plt.grid()
-    plt.savefig(save_dir)
+    plt.savefig(save_dir+".pdf")
 
